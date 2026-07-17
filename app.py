@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from src import config, data_loader, features, preprocessing, viz
+from src import config, data_loader, features, od_analysis, preprocessing, viz
 
 # --------------------------------------------------------------------------- #
 # KONFIGURASI HALAMAN & GAYA
@@ -119,6 +119,24 @@ def load_artifacts():
     if pred_path.exists():
         pred = pd.read_csv(pred_path)
     return metrics, comp, fi, pred
+
+
+@st.cache_data(show_spinner="Menghitung matriks OD ...")
+def get_od():
+    """Agregat analisis OD (bangkitan, tarikan, matriks, desire lines)."""
+    clean, *_ = load_data()
+    od = od_analysis.complete_od_trips(clean)
+    return {
+        "n": int(len(od)),
+        "avg_dist": float(od["distance_km"].mean()),
+        "n_orig": int(od["tapInStopsName"].nunique()),
+        "n_dest": int(od["tapOutStopsName"].nunique()),
+        "prod": od_analysis.production_by_stop(od, 15),
+        "attr": od_analysis.attraction_by_stop(od, 15),
+        "net": od_analysis.net_flow(od, 14),
+        "matrix": od_analysis.od_matrix(od, 12),
+        "lines": od_analysis.desire_lines(od, 25),
+    }
 
 
 @st.cache_data
@@ -327,6 +345,49 @@ def page_map():
     )
 
 
+def page_od():
+    st.header("🔄 Analisis Origin-Destination (OD)")
+    st.caption("Perspektif perencanaan transportasi — Bangkitan (produksi), Tarikan (atraksi), Matriks OD & Desire Lines.")
+    od = get_od()
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.markdown(kpi("Perjalanan OD Lengkap", fmt(od["n"]), "punya asal & tujuan"), unsafe_allow_html=True)
+    c2.markdown(kpi("Jarak Rata-rata", f'{od["avg_dist"]:.2f} km', "asal → tujuan"), unsafe_allow_html=True)
+    c3.markdown(kpi("Halte Asal", fmt(od["n_orig"]), "titik bangkitan"), unsafe_allow_html=True)
+    c4.markdown(kpi("Halte Tujuan", fmt(od["n_dest"]), "titik tarikan"), unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="insight"><b>Konsep:</b> <b style="color:#1E5AA8">Bangkitan (Produksi)</b> = perjalanan '
+        'yang berangkat dari suatu halte (tap-in). <b style="color:#F26522">Tarikan (Atraksi)</b> = perjalanan '
+        'yang menuju suatu halte (tap-out). Keduanya adalah fondasi model empat-tahap perencanaan transportasi.</div>',
+        unsafe_allow_html=True,
+    )
+
+    t1, t2, t3 = st.tabs(["🔵🟠 Bangkitan & Tarikan", "🔢 Matriks OD", "🗺️ Desire Lines"])
+    with t1:
+        c1, c2 = st.columns(2)
+        c1.plotly_chart(viz.production_bars(od["prod"]), width="stretch")
+        c2.plotly_chart(viz.attraction_bars(od["attr"]), width="stretch")
+        st.plotly_chart(viz.net_flow_diverging(od["net"]), width="stretch")
+        insight(
+            "Halte dengan <b>net positif (biru)</b> adalah <b>penghasil</b> perjalanan (kawasan permukiman/asal komuter); "
+            "<b>net negatif (jingga)</b> adalah <b>penarik</b> perjalanan (kawasan kerja/pusat kegiatan). "
+            "Informasi ini memandu penempatan armada di titik bangkitan pada jam berangkat.", orange=True,
+        )
+    with t2:
+        st.plotly_chart(viz.od_heatmap(od["matrix"]), width="stretch")
+        insight(
+            "Sel yang lebih gelap = pasangan asal→tujuan dengan volume perjalanan tinggi. "
+            "Berguna untuk mengidentifikasi koridor permintaan utama yang perlu diprioritaskan."
+        )
+    with t3:
+        st.plotly_chart(viz.desire_lines_map(od["lines"]), width="stretch")
+        insight(
+            "<b>Desire lines</b> menggambarkan 25 pasangan OD tersibuk — garis lebih tebal berarti lebih banyak "
+            "perjalanan. Pola ini memperlihatkan koridor keinginan pergerakan utama di jaringan TransJakarta.", orange=True,
+        )
+
+
 def page_model():
     st.header("🤖 Pemodelan & Evaluasi")
     st.caption("SKKNI Unit 7-11 — Konstruksi fitur, skenario model, pembangunan, evaluasi, review.")
@@ -508,6 +569,7 @@ PAGES = {
     "✅ Kualitas Data": page_quality,
     "🔍 EDA Interaktif": page_eda,
     "🗺️ Peta Geospasial": page_map,
+    "🔄 Analisis OD": page_od,
     "🤖 Pemodelan": page_model,
     "🎯 Simulasi Prediksi": page_simulation,
     "📌 Kesimpulan": page_conclusion,

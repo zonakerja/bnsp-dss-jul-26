@@ -241,6 +241,106 @@ def stops_map(df: pd.DataFrame, top_n: int = 400) -> go.Figure:
 
 
 # --------------------------------------------------------------------------- #
+# ANALISIS ORIGIN-DESTINATION (OD)
+# --------------------------------------------------------------------------- #
+def production_bars(prod_df: pd.DataFrame) -> go.Figure:
+    """Bangkitan (produksi) per halte asal."""
+    d = prod_df.sort_values("produksi")
+    fig = go.Figure(
+        go.Bar(
+            x=d["produksi"], y=d["halte"], orientation="h",
+            marker_color=config.COLOR_BLUE,
+            hovertemplate="%{y}<br>Bangkitan %{x:,} perjalanan<extra></extra>",
+        )
+    )
+    fig.update_layout(xaxis_title="Bangkitan (perjalanan berangkat)", yaxis_title=None, height=420)
+    return _apply_theme(fig, "🔵 Bangkitan Tertinggi (Halte Asal)")
+
+
+def attraction_bars(attr_df: pd.DataFrame) -> go.Figure:
+    """Tarikan (atraksi) per halte tujuan."""
+    d = attr_df.sort_values("tarikan")
+    fig = go.Figure(
+        go.Bar(
+            x=d["tarikan"], y=d["halte"], orientation="h",
+            marker_color=config.COLOR_ORANGE,
+            hovertemplate="%{y}<br>Tarikan %{x:,} perjalanan<extra></extra>",
+        )
+    )
+    fig.update_layout(xaxis_title="Tarikan (perjalanan menuju)", yaxis_title=None, height=420)
+    return _apply_theme(fig, "🟠 Tarikan Tertinggi (Halte Tujuan)")
+
+
+def net_flow_diverging(net_df: pd.DataFrame) -> go.Figure:
+    """Diverging bar net flow: halte penghasil (biru) vs penarik (jingga) perjalanan."""
+    d = net_df.copy()
+    colors = [config.COLOR_BLUE if v >= 0 else config.COLOR_ORANGE for v in d["net"]]
+    fig = go.Figure(
+        go.Bar(
+            x=d["net"], y=d["halte"], orientation="h", marker_color=colors,
+            hovertemplate="%{y}<br>Net %{x:,} (produksi−tarikan)<extra></extra>",
+        )
+    )
+    fig.add_vline(x=0, line=dict(color=config.COLOR_GRAY, width=1))
+    fig.update_layout(xaxis_title="Net Flow  (◄ penarik   |   penghasil ►)", yaxis_title=None, height=440)
+    return _apply_theme(fig, "Keseimbangan Halte: Penghasil vs Penarik Perjalanan")
+
+
+def od_heatmap(mat: pd.DataFrame) -> go.Figure:
+    """Heatmap matriks OD (asal × tujuan)."""
+    fig = go.Figure(
+        go.Heatmap(
+            z=mat.values, x=list(mat.columns), y=list(mat.index),
+            colorscale=config.SEQUENTIAL_BLUES,
+            hovertemplate="Asal: %{y}<br>Tujuan: %{x}<br>%{z:,} perjalanan<extra></extra>",
+            colorbar=dict(title="Perjalanan"),
+        )
+    )
+    fig.update_layout(xaxis_title="Halte Tujuan", yaxis_title="Halte Asal", height=560,
+                      xaxis=dict(tickangle=-40))
+    return _apply_theme(fig, "Matriks Origin-Destination (Halte Tersibuk)")
+
+
+def desire_lines_map(lines_df: pd.DataFrame) -> go.Figure:
+    """Peta desire lines: garis keinginan perjalanan asal→tujuan tersibuk."""
+    maxt = float(lines_df["trips"].max()) if len(lines_df) else 1.0
+    fig = go.Figure()
+    for _, r in lines_df.iterrows():
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=[r["tapInStopsLat"], r["tapOutStopsLat"]],
+                lon=[r["tapInStopsLon"], r["tapOutStopsLon"]],
+                mode="lines",
+                line=dict(width=1.2 + 5.5 * r["trips"] / maxt, color=config.COLOR_ORANGE),
+                opacity=0.45, hoverinfo="skip", showlegend=False,
+            )
+        )
+    fig.add_trace(
+        go.Scattermapbox(
+            lat=lines_df["tapInStopsLat"], lon=lines_df["tapInStopsLon"], mode="markers",
+            marker=dict(size=9, color=config.COLOR_BLUE), name="Asal",
+            text=lines_df["tapInStopsName"], hovertemplate="Asal: %{text}<extra></extra>",
+        )
+    )
+    fig.add_trace(
+        go.Scattermapbox(
+            lat=lines_df["tapOutStopsLat"], lon=lines_df["tapOutStopsLon"], mode="markers",
+            marker=dict(size=9, color=config.COLOR_BLUE_DARK), name="Tujuan",
+            text=lines_df["tapOutStopsName"], hovertemplate="Tujuan: %{text}<extra></extra>",
+        )
+    )
+    clat = float(pd.concat([lines_df["tapInStopsLat"], lines_df["tapOutStopsLat"]]).mean())
+    clon = float(pd.concat([lines_df["tapInStopsLon"], lines_df["tapOutStopsLon"]]).mean())
+    fig.update_layout(
+        mapbox_style="open-street-map", mapbox_zoom=10.2,
+        mapbox_center={"lat": clat, "lon": clon},
+        margin=dict(l=0, r=0, t=10, b=0), height=560,
+        legend=dict(orientation="h", yanchor="bottom", y=0.01, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"),
+    )
+    return fig
+
+
+# --------------------------------------------------------------------------- #
 # PEMODELAN & EVALUASI
 # --------------------------------------------------------------------------- #
 def model_comparison(comp: pd.DataFrame) -> go.Figure:
