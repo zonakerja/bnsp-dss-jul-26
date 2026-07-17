@@ -596,6 +596,7 @@ with st.sidebar:
         </div>""",
         unsafe_allow_html=True,
     )
+    st.divider()
     with st.expander("ℹ️ Tentang & Teknologi"):
         st.markdown(
             "**Stack:** Python · pandas · scikit-learn · XGBoost · Plotly · Streamlit\n\n"
@@ -603,6 +604,6 @@ with st.sidebar:
             "**Metodologi:** CRISP-DM (11 unit SKKNI)\n\n"
             "[📦 Repositori GitHub](https://github.com/zonakerja/bnsp-dss-jul-26)"
         )
-    st.caption("© 2023 · Portofolio Asesmen BNSP")
+    st.caption("© 2026 · Portofolio Asesmen BNSP")
 
 PAGES[choice]()
