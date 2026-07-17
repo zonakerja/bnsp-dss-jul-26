@@ -201,6 +201,9 @@ def page_home():
     for i, (t, d) in enumerate(steps):
         cols[i % 3].markdown(f'<div class="insight"><b>{t}</b><br><span style="color:#6B7A99">{d}</span></div>', unsafe_allow_html=True)
 
+    st.markdown("### 📈 Sekilas Pola Permintaan")
+    st.plotly_chart(viz.hourly_demand(clean), width="stretch")
+
     st.caption(f"Asesi: **{config.ASESI_NAME}**  ·  Periode data: {config.DATA_PERIOD}  ·  Sumber: dataset TransJakarta")
 
 
@@ -229,6 +232,12 @@ def page_dataset():
             default=["transID", "payCardBank", "payCardSex", "age", "corridorName", "tapInStopsName", "tapInTime", "payAmount"],
         )
         st.dataframe(clean[cols].head(200), width="stretch", hide_index=True)
+        st.download_button(
+            "⬇️ Unduh 500 baris sampel (CSV)",
+            clean[cols].head(500).to_csv(index=False).encode("utf-8"),
+            "sampel_transjakarta.csv",
+            "text/csv",
+        )
     with tab4:
         st.markdown(
             "- **H1** — Demand memuncak pada jam sibuk pagi & sore (pola *bimodal*).\n"
@@ -337,6 +346,12 @@ def page_model():
     with t1:
         st.plotly_chart(viz.model_comparison(comp), width="stretch")
         st.dataframe(comp, width="stretch", hide_index=True)
+        st.download_button(
+            "⬇️ Unduh tabel perbandingan model (CSV)",
+            comp.to_csv(index=False).encode("utf-8"),
+            "perbandingan_model.csv",
+            "text/csv",
+        )
         insight(f"<b>{metrics['best_model']}</b> unggul pada semua metrik. Model tree-based mengungguli "
                 "regresi linier karena hubungan fitur-target non-linier (efek jam & hari).", orange=True)
     with t2:
@@ -348,6 +363,15 @@ def page_model():
         c1.plotly_chart(viz.pred_vs_actual(pred), width="stretch")
         c2.plotly_chart(viz.residual_distribution(pred), width="stretch")
         insight("Titik mengumpul di sekitar garis ideal; residual terpusat di nol tanpa bias sistematis.")
+        st.plotly_chart(viz.mae_by_hour(pred), width="stretch")
+        insight("Diagnostik galat per jam relatif merata — model tidak bias berat pada jam tertentu; "
+                "galat sedikit lebih besar di jam puncak (demand tinggi & lebih bervariasi).", orange=True)
+        st.download_button(
+            "⬇️ Unduh prediksi vs aktual test set (CSV)",
+            pred.to_csv(index=False).encode("utf-8"),
+            "prediksi_vs_aktual.csv",
+            "text/csv",
+        )
     with t4:
         st.markdown(
             f"""
@@ -414,6 +438,22 @@ def page_simulation():
             orange=features._is_peak(hour),
         )
         st.caption("Catatan: prediksi pada level koridor-jam (rata-rata cacah kecil); gunakan untuk perencanaan relatif, bukan angka absolut presisi.")
+
+    st.markdown("---")
+    st.markdown("#### 📈 Prediksi Permintaan Sepanjang Hari")
+    hours = list(range(5, 22))
+    batch = pd.concat(
+        [features.make_prediction_row(row["corridorID"], row["corridor_type"], dow, h) for h in hours],
+        ignore_index=True,
+    )
+    preds_day = np.clip(model.predict(batch), 0, None)
+    st.plotly_chart(viz.predicted_day_curve(hours, preds_day), width="stretch")
+    insight(
+        f"Kurva ini adalah pola permintaan harian yang <b>dipelajari model</b> untuk koridor "
+        f"<b>{corridor_name}</b> pada hari {day_name} — titik jingga menandai jam sibuk. "
+        "Inilah bukti model menangkap ritme operasional, bukan sekadar satu angka.",
+        orange=True,
+    )
 
 
 def page_conclusion():
@@ -483,5 +523,12 @@ PAGES[choice]()
 
 with st.sidebar:
     st.markdown("---")
+    with st.expander("ℹ️ Tentang & Teknologi"):
+        st.markdown(
+            "**Stack:** Python · pandas · scikit-learn · XGBoost · Plotly · Streamlit\n\n"
+            "**Model:** XGBoost (objective Poisson) — R² 0,715 · MAE 1,05\n\n"
+            "**Metodologi:** CRISP-DM (11 unit SKKNI)\n\n"
+            "[📦 Repositori GitHub](https://github.com/zonakerja/bnsp-dss-jul-26)"
+        )
     st.caption(f"👤 Asesi: **{config.ASESI_NAME}**")
     st.caption(f"📅 Data: {config.DATA_PERIOD}")

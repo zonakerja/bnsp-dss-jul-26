@@ -324,6 +324,55 @@ def residual_distribution(pred_df: pd.DataFrame) -> go.Figure:
     return _apply_theme(fig, "Distribusi Residual")
 
 
+def predicted_day_curve(hours, preds) -> go.Figure:
+    """Kurva prediksi demand sepanjang hari (menyoroti jam sibuk)."""
+    peak = [features._is_peak(int(h)) for h in hours]
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=list(hours),
+            y=list(preds),
+            mode="lines",
+            line=dict(color=config.COLOR_BLUE, width=3, shape="spline"),
+            fill="tozeroy",
+            fillcolor="rgba(30,90,168,0.12)",
+            hovertemplate="Jam %{x}:00<br>prediksi %{y:.1f} penumpang<extra></extra>",
+            name="Prediksi",
+        )
+    )
+    # Titik jam sibuk (jingga)
+    fig.add_trace(
+        go.Scatter(
+            x=[h for h, pk in zip(hours, peak) if pk],
+            y=[y for y, pk in zip(preds, peak) if pk],
+            mode="markers",
+            marker=dict(color=config.COLOR_ORANGE, size=10, line=dict(color="white", width=1)),
+            hovertemplate="Jam sibuk %{x}:00<br>%{y:.1f} penumpang<extra></extra>",
+            name="Jam sibuk",
+        )
+    )
+    fig.update_layout(xaxis_title="Jam", yaxis_title="Prediksi Penumpang")
+    fig.update_xaxes(dtick=1)
+    return _apply_theme(fig, "Prediksi Permintaan Sepanjang Hari")
+
+
+def mae_by_hour(pred_df: pd.DataFrame) -> go.Figure:
+    """Diagnostik: rata-rata galat absolut (MAE) per jam pada test set."""
+    d = pred_df.assign(abs_err=(pred_df["actual"] - pred_df["predicted"]).abs())
+    g = d.groupby("hour")["abs_err"].mean()
+    fig = go.Figure(
+        go.Bar(
+            x=g.index,
+            y=g.values,
+            marker_color=config.COLOR_BLUE,
+            hovertemplate="Jam %{x}:00<br>MAE %{y:.2f} penumpang<extra></extra>",
+        )
+    )
+    fig.update_layout(xaxis_title="Jam", yaxis_title="MAE (penumpang)")
+    fig.update_xaxes(dtick=1)
+    return _apply_theme(fig, "Galat Rata-rata (MAE) per Jam")
+
+
 def prediction_gauge(value: float, avg_reference: float) -> go.Figure:
     """Gauge hasil prediksi demand relatif terhadap rata-rata."""
     upper = max(value, avg_reference) * 1.8 + 5

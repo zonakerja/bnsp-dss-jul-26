@@ -348,18 +348,15 @@ function bg(slide, color) {
     s.addShape(p.ShapeType.roundRect, { x: 0.6, y, w: 5.7, h: 0.46, fill: { color: i % 2 ? WHITE : LIGHT }, line: { color: LIGHT, width: 1 }, rectRadius: 0.06 });
     s.addText(pg, { x: 0.8, y, w: 5.4, h: 0.46, valign: "middle", fontSize: 13.5, color: NAVY, fontFace: BFONT, margin: 0 });
   });
-  card(s, 6.7, 1.7, 6.0, 5.1, NAVY);
-  s.addText("Arsitektur Deploy", { x: 6.95, y: 1.95, w: 5.5, h: 0.4, fontSize: 17, bold: true, color: ORANGE, fontFace: BFONT, margin: 0 });
+  s.addText("⭐ Fitur unggulan — Simulasi Prediksi 24 Jam", { x: 6.6, y: 1.72, w: 6.3, h: 0.4, fontSize: 15, bold: true, color: ORANGE, fontFace: BFONT, margin: 0 });
+  s.addImage({ path: A("fig_day_curve.png"), x: 6.6, y: 2.15, w: 6.3, h: 3.28 });
+  s.addText("Pilih koridor + hari → model menghasilkan kurva permintaan sepanjang hari (puncak jingga = jam sibuk). Bukti model menangkap ritme operasional, bukan sekadar satu angka.", { x: 6.6, y: 5.5, w: 6.3, h: 0.7, fontSize: 12, italic: true, color: GRAY, fontFace: BFONT, margin: 0 });
+  card(s, 6.6, 6.25, 6.3, 0.65, NAVY);
   s.addText([
-    { text: "Model dilatih offline → disimpan demand_model.pkl", options: { bullet: true, breakLine: true } },
-    { text: "Aplikasi hanya memuat artefak → ringan & cepat", options: { bullet: true, breakLine: true } },
-    { text: "Caching Streamlit (@st.cache_data / _resource)", options: { bullet: true, breakLine: true } },
-    { text: "Tema konsisten biru–putih–jingga", options: { bullet: true, breakLine: true } },
-    { text: "Deploy gratis ke Streamlit Community Cloud", options: { bullet: true } },
-  ], { x: 7.0, y: 2.55, w: 5.4, h: 2.4, fontSize: 14, color: "CADCFC", fontFace: BFONT, paraSpaceAfter: 9, margin: 0 });
-  s.addShape(p.ShapeType.roundRect, { x: 6.95, y: 5.55, w: 5.5, h: 0.95, fill: { color: ORANGE }, line: { type: "none" }, rectRadius: 0.1 });
-  s.addText("🎯 Fitur unggulan: Simulasi prediksi real-time\npilih koridor + hari + jam → estimasi penumpang", { x: 6.95, y: 5.55, w: 5.5, h: 0.95, align: "center", valign: "middle", fontSize: 12.5, bold: true, color: WHITE, fontFace: BFONT, margin: 0 });
-  s.addNotes("Aplikasi 8 halaman. Arsitektur: model offline, app memuat artefak. Demo fitur simulasi real-time.");
+    { text: "Arsitektur: ", options: { bold: true, color: ORANGE } },
+    { text: "model dilatih offline (.pkl) · app memuat artefak + caching · deploy gratis di Streamlit Cloud.", options: { color: "CADCFC" } },
+  ], { x: 6.85, y: 6.35, w: 5.85, h: 0.45, fontSize: 11.5, fontFace: BFONT, valign: "middle", margin: 0 });
+  s.addNotes("Aplikasi 8 halaman. Fitur unggulan: simulasi menghasilkan kurva demand 24 jam. Arsitektur: model offline, app memuat artefak, deploy di Streamlit Cloud.");
 }
 
 // =================== SLIDE 16 — PENUTUP ===================
