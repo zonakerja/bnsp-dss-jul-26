@@ -298,12 +298,13 @@ def page_eda():
     st.caption("SKKNI Unit 3 — Karakteristik data disajikan dengan visualisasi & dianalisis.")
     clean, *_ = load_data()
 
-    with st.sidebar:
-        st.markdown("### 🎛️ Filter EDA")
+    with st.container(border=True):
+        st.markdown("**🎛️ Filter Interaktif**")
+        f1, f2, f3 = st.columns([1.5, 1, 1.4])
         types = sorted(clean["corridor_type"].dropna().unique())
-        sel_types = st.multiselect("Jenis koridor", types, default=types)
-        sexes = st.multiselect("Gender", ["F", "M"], default=["F", "M"])
-        hr = st.slider("Rentang jam", 5, 21, (5, 21))
+        sel_types = f1.multiselect("Jenis koridor", types, default=types)
+        sexes = f2.multiselect("Gender", ["F", "M"], default=["F", "M"])
+        hr = f3.slider("Rentang jam", 5, 21, (5, 21))
 
     mask = (
         clean["corridor_type"].isin(sel_types)
@@ -579,12 +580,22 @@ with st.sidebar:
     st.markdown(f"## 🚌 {config.APP_TITLE}")
     st.caption(config.SCHEME_NAME)
     choice = st.radio("Navigasi", list(PAGES.keys()), label_visibility="collapsed")
-    st.markdown("---")
+    st.divider()
 
-PAGES[choice]()
-
-with st.sidebar:
-    st.markdown("---")
+    _m, *_ = load_artifacts()
+    _r2 = f'{_m["test_metrics"]["R2"]:.3f}' if _m else "-"
+    _mae = f'{_m["test_metrics"]["MAE"]:.2f}' if _m else "-"
+    st.markdown(
+        f"""<div style="background:#FFFFFF;border:1px solid #D6E4F5;border-radius:12px;padding:.75rem .9rem;">
+        <div style="font-size:.72rem;color:{config.COLOR_GRAY};text-transform:uppercase;letter-spacing:.03em">🤖 Model Terbaik</div>
+        <div style="font-size:1rem;font-weight:700;color:{config.COLOR_BLUE_DARK};margin:.1rem 0 .1rem">XGBoost · Poisson</div>
+        <div style="font-size:.8rem;color:{config.COLOR_BLUE}">R² {_r2} &nbsp;·&nbsp; MAE {_mae} pnp</div>
+        <hr style="border:none;border-top:1px solid #E1E8F2;margin:.55rem 0">
+        <div style="font-size:.78rem;color:{config.COLOR_BLUE_DARK}">👤 <b>{config.ASESI_NAME}</b></div>
+        <div style="font-size:.74rem;color:{config.COLOR_GRAY}">📅 {config.DATA_PERIOD}</div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
     with st.expander("ℹ️ Tentang & Teknologi"):
         st.markdown(
             "**Stack:** Python · pandas · scikit-learn · XGBoost · Plotly · Streamlit\n\n"
@@ -592,5 +603,6 @@ with st.sidebar:
             "**Metodologi:** CRISP-DM (11 unit SKKNI)\n\n"
             "[📦 Repositori GitHub](https://github.com/zonakerja/bnsp-dss-jul-26)"
         )
-    st.caption(f"👤 Asesi: **{config.ASESI_NAME}**")
-    st.caption(f"📅 Data: {config.DATA_PERIOD}")
+    st.caption("© 2023 · Portofolio Asesmen BNSP")
+
+PAGES[choice]()

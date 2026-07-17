@@ -74,7 +74,7 @@ agregasi *(koridor × tanggal × jam)* = 61.730 slot.
 - [x] **Tahap 2** — Feature engineering
 - [x] **Tahap 3** — Training & perbandingan 7 model + tuning
 - [x] **Tahap 4** — Modul visualisasi (15 grafik Plotly)
-- [x] **Tahap 5** — Aplikasi Streamlit (8 halaman, teruji AppTest)
+- [x] **Tahap 5** — Aplikasi Streamlit (9 halaman termasuk Analisis OD, teruji AppTest)
 - [x] **Tahap 6** — Polish akhir (tema, KPI cards, caching, migrasi API)
 - [ ] **Tahap 7** — Deploy ke Streamlit Cloud (lihat `DEPLOYMENT.md` — perlu akun Anda)
 - [x] **Tahap 8** — PPT presentasi (`ppt/TransJakarta_Demand_Prediction_BNSP.pptx`, 16 slide)
