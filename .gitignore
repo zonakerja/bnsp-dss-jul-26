@@ -1,0 +1,27 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# uv
+uv.lock
+
+# Node (hanya untuk generator PPT)
+ppt/node_modules/
+ppt/package-lock.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Jangan abaikan model/laporan hasil (dibutuhkan app di cloud):
+!models/
+!reports/

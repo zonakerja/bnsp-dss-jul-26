@@ -1,0 +1,10 @@
+# Tema aplikasi: aksen Biru - Putih - Jingga (khas TransJakarta)
+[theme]
+primaryColor = "#F26522"          # Jingga (aksen aksi/CTA)
+backgroundColor = "#FFFFFF"        # Putih
+secondaryBackgroundColor = "#EAF2FB"  # Biru sangat muda (kartu/sidebar)
+textColor = "#1B2A4A"             # Biru tua (teks)
+font = "sans serif"
+
+[server]
+maxUploadSize = 200

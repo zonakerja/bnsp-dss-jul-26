@@ -1,0 +1,120 @@
+{
+  "best_model": "XGBoost",
+  "dituning": true,
+  "best_params": {
+    "model__subsample": 0.8,
+    "model__n_estimators": 700,
+    "model__max_depth": 4,
+    "model__learning_rate": 0.05
+  },
+  "cv_r2": 0.6872,
+  "target": "passenger_count",
+  "aggregation_level": "corridorID x date x hour",
+  "n_train": 49384,
+  "n_test": 12346,
+  "features": {
+    "target_encode": [
+      "corridorID"
+    ],
+    "onehot": [
+      "corridor_type",
+      "day_name",
+      "part_of_day"
+    ],
+    "numeric": [
+      "hour",
+      "day_of_week",
+      "is_weekend",
+      "is_peak",
+      "week_of_month"
+    ]
+  },
+  "test_metrics": {
+    "MAE": 1.087,
+    "RMSE": 1.4665,
+    "R2": 0.7153,
+    "MAPE_persen": 48.7115
+  },
+  "success_criteria": {
+    "primary_operasional": {
+      "metrik": "MAE",
+      "target": "<= 1.5 penumpang/slot",
+      "nilai": 1.087,
+      "tercapai": true
+    },
+    "sekunder_statistik": {
+      "metrik": "R2",
+      "target": ">= 0.70",
+      "nilai": 0.7153,
+      "tercapai": true
+    },
+    "unggul_dari_baseline": true,
+    "catatan": "Target aspiratif R2>=0.80 tidak tercapai; pada granularitas koridor-jam rata-rata cacah hanya ~3 sehingga ada batas bawah noise Poisson. MAE ~1 penumpang sudah memadai untuk perencanaan."
+  },
+  "all_models": [
+    {
+      "model": "XGBoost",
+      "cv_r2": 0.6835,
+      "test_R2": 0.7126,
+      "test_MAE": 1.0854,
+      "test_RMSE": 1.4733,
+      "test_MAPE_persen": 48.44,
+      "waktu_detik": 12.7
+    },
+    {
+      "model": "Gradient Boosting",
+      "cv_r2": 0.644,
+      "test_R2": 0.6869,
+      "test_MAE": 1.1228,
+      "test_RMSE": 1.5379,
+      "test_MAPE_persen": 51.22,
+      "waktu_detik": 18.7
+    },
+    {
+      "model": "Decision Tree",
+      "cv_r2": 0.6356,
+      "test_R2": 0.6638,
+      "test_MAE": 1.1245,
+      "test_RMSE": 1.5937,
+      "test_MAPE_persen": 49.23,
+      "waktu_detik": 1.3
+    },
+    {
+      "model": "Random Forest",
+      "cv_r2": 0.6321,
+      "test_R2": 0.6629,
+      "test_MAE": 1.1643,
+      "test_RMSE": 1.5958,
+      "test_MAPE_persen": 51.43,
+      "waktu_detik": 61.8
+    },
+    {
+      "model": "Regresi Linier",
+      "cv_r2": 0.3828,
+      "test_R2": 0.4203,
+      "test_MAE": 1.4237,
+      "test_RMSE": 2.0927,
+      "test_MAPE_persen": 68.98,
+      "waktu_detik": 5.0
+    },
+    {
+      "model": "Ridge",
+      "cv_r2": 0.3828,
+      "test_R2": 0.4202,
+      "test_MAE": 1.4237,
+      "test_RMSE": 2.0927,
+      "test_MAPE_persen": 68.97,
+      "waktu_detik": 5.1
+    },
+    {
+      "model": "Baseline (Rata-rata)",
+      "cv_r2": -0.0,
+      "test_R2": -0.0001,
+      "test_MAE": 1.7524,
+      "test_RMSE": 2.7486,
+      "test_MAPE_persen": 87.65,
+      "waktu_detik": 4.1
+    }
+  ],
+  "trained_at": "2026-07-18 01:37:00"
+}

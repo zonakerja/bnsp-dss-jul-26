@@ -1,0 +1,8 @@
+model,cv_r2,test_R2,test_MAE,test_RMSE,test_MAPE_persen,waktu_detik
+XGBoost,0.6835,0.7126,1.0854,1.4733,48.44,12.7
+Gradient Boosting,0.644,0.6869,1.1228,1.5379,51.22,18.7
+Decision Tree,0.6356,0.6638,1.1245,1.5937,49.23,1.3
+Random Forest,0.6321,0.6629,1.1643,1.5958,51.43,61.8
+Regresi Linier,0.3828,0.4203,1.4237,2.0927,68.98,5.0
+Ridge,0.3828,0.4202,1.4237,2.0927,68.97,5.1
+Baseline (Rata-rata),-0.0,-0.0001,1.7524,2.7486,87.65,4.1
